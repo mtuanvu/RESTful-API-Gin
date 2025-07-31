@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"mtuanvu.id.vn/restful-api-gin/internal/dtos"
 	"mtuanvu.id.vn/restful-api-gin/internal/models"
 	"mtuanvu.id.vn/restful-api-gin/internal/services"
 	"mtuanvu.id.vn/restful-api-gin/internal/utils"
@@ -27,6 +28,7 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, validations.HandleValidationErrors(err))
+		return
 	}
 
 	createdUser, err := uh.service.CreateUser(user)
@@ -35,7 +37,9 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	utils.ResponseSuccess(ctx, http.StatusCreated, createdUser)
+	userResponse := dtos.MapUserToDTO(createdUser)
+
+	utils.ResponseSuccess(ctx, http.StatusCreated, &userResponse)
 }
 
 func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {

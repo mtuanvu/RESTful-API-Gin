@@ -66,6 +66,10 @@ func HandleValidationErrors(err error) gin.H {
 				errors[fieldPath] = fmt.Sprintf("%s phải đúng định dạng email", fieldPath)
 			case "datetime":
 				errors[fieldPath] = fmt.Sprintf("%s phải theo đúng định dạng yyyy-MM-dd HH:mm:ss", fieldPath)
+			case "email_advanced":
+				errors[fieldPath] = fmt.Sprintf("%s email này lằm trong danh sách bị cấm", fieldPath)
+			case "password_strong":
+				errors[fieldPath] = fmt.Sprintf("%s bắt buộc phải có ít nhất 8 ký tự bao gồm chữ thường, hoa, số và ký tự đặc biệt", fieldPath)
 			case "file_ext":
 				allowedValues := strings.Join(strings.Split(e.Param(), " "), ", ")
 				errors[fieldPath] = fmt.Sprintf("%s chỉ cho phép những file có định dạng: %s", fieldPath, allowedValues)
@@ -79,6 +83,40 @@ func HandleValidationErrors(err error) gin.H {
 }
 
 func RegisterCustomValidation(v *validator.Validate) {
+
+	var blockedDomains = map[string]bool{
+		"blacklist.com": true,
+		"edu.vn":        true,
+		"abc.com":       true,
+	}
+	v.RegisterValidation("email_advanced", func(fl validator.FieldLevel) bool {
+		email := fl.Field().String()
+
+		parts := strings.Split(email, "@")
+		if len(parts) != 2 {
+			return false
+		}
+
+		domains := utils.NormalizeString(parts[1])
+
+		return !blockedDomains[domains]
+	})
+
+	v.RegisterValidation("password_strong", func(fl validator.FieldLevel) bool {
+		password := fl.Field().String()
+
+		if len(password) < 8 {
+			return false
+		}
+
+		hasLower := regexp.MustCompile(`[a-z]`).MatchString(password)
+		hasUpper := regexp.MustCompile(`[A-Z]`).MatchString(password)
+		hasDigit := regexp.MustCompile(`[0-9]`).MatchString(password)
+		hasSpecial := regexp.MustCompile(`[!"#$%&'()*+,\-./:;<=>?@\[\\\]^_{|}~]`).MatchString(password)
+
+		return hasLower && hasUpper && hasDigit && hasSpecial
+	})
+
 	var slugRegex = regexp.MustCompile(`^[a-z0-9]+(?:[-.][a-z0-9]+)*$`)
 	v.RegisterValidation("slug", func(fl validator.FieldLevel) bool {
 		return slugRegex.MatchString(fl.Field().String())
