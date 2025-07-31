@@ -1,9 +1,13 @@
 package app
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"mtuanvu.id.vn/restful-api-gin/internal/config"
 	"mtuanvu.id.vn/restful-api-gin/internal/routes"
+	"mtuanvu.id.vn/restful-api-gin/internal/validations"
 )
 
 type Module interface {
@@ -11,11 +15,16 @@ type Module interface {
 }
 
 type Application struct {
-	config *config.Config
-	router *gin.Engine
+	config  *config.Config
+	router  *gin.Engine
+	modules []Module
 }
 
 func NewApplication(cfg *config.Config) *Application {
+	validations.InitValidator()
+
+	loadEnv()
+
 	r := gin.Default()
 
 	modules := []Module{
@@ -24,8 +33,9 @@ func NewApplication(cfg *config.Config) *Application {
 	routes.RegisterRoutes(r, getModuleRoutes(modules)...)
 
 	return &Application{
-		config: cfg,
-		router: r,
+		config:  cfg,
+		router:  r,
+		modules: modules,
 	}
 }
 
@@ -41,4 +51,11 @@ func getModuleRoutes(modules []Module) []routes.Routes {
 	}
 
 	return routeList
+}
+
+func loadEnv() {
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Printf("Not found env")
+	}
 }

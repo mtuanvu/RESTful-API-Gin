@@ -10,8 +10,12 @@ type Routes interface {
 }
 
 func RegisterRoutes(r *gin.Engine, routes ...Routes) {
-	
-	r.Use(middleware.AuthMiddleware())
+
+	r.Use(
+		middleware.LoggerMiddleware(),
+		middleware.ApiKeyMiddleware(),
+		middleware.AuthMiddleware(),
+		middleware.RateLimiterMiddleware())
 
 	api := r.Group("/api/v1")
 
