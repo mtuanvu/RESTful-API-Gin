@@ -1,10 +1,13 @@
 package handlers
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"mtuanvu.id.vn/restful-api-gin/internal/models"
 	"mtuanvu.id.vn/restful-api-gin/internal/services"
+	"mtuanvu.id.vn/restful-api-gin/internal/utils"
+	"mtuanvu.id.vn/restful-api-gin/internal/validations"
 )
 
 type UserHandler struct {
@@ -18,13 +21,21 @@ func NewUserHandler(services services.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetAllUsers(ctx *gin.Context) {
-	log.Println("Get All User from User Handler")
-
-	uh.service.GetAllUsers()
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
+	var user models.User
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		ctx.JSON(http.StatusBadRequest, validations.HandleValidationErrors(err))
+	}
 
+	createdUser, err := uh.service.CreateUser(user)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	utils.ResponseSuccess(ctx, http.StatusCreated, createdUser)
 }
 
 func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {

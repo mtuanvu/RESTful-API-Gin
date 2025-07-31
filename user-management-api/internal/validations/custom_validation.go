@@ -75,7 +75,7 @@ func HandleValidationErrors(err error) gin.H {
 		return gin.H{"error": errors}
 	}
 
-	return gin.H{"error": "Yêu cầu không hợp lệ " + err.Error()}
+	return gin.H{"error": "Yêu cầu không hợp lệ", "details": err.Error()}
 }
 
 func RegisterCustomValidation(v *validator.Validate) {

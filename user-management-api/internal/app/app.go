@@ -21,7 +21,9 @@ type Application struct {
 }
 
 func NewApplication(cfg *config.Config) *Application {
-	validations.InitValidator()
+	if err := validations.InitValidator(); err != nil {
+		log.Fatal("Validator init failed %v", err)
+	}
 
 	loadEnv()
 
