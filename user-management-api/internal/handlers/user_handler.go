@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"mtuanvu.id.vn/restful-api-gin/internal/dtos"
-	"mtuanvu.id.vn/restful-api-gin/internal/models"
 	"mtuanvu.id.vn/restful-api-gin/internal/services"
 	"mtuanvu.id.vn/restful-api-gin/internal/utils"
 	"mtuanvu.id.vn/restful-api-gin/internal/validations"
@@ -58,11 +57,13 @@ func (uh *UserHandler) GetAllUsers(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
-	var user models.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var input dtos.CreateUserInput
+	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.ResponseValidator(ctx, validations.HandleValidationErrors(err))
 		return
 	}
+
+	user := input.MapUser()
 
 	createdUser, err := uh.service.CreateUser(user)
 	if err != nil {
@@ -100,11 +101,14 @@ func (uh *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	var user models.User
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var input dtos.UpdateUserInput
+
+	if err := ctx.ShouldBindJSON(&input); err != nil {
 		utils.ResponseValidator(ctx, validations.HandleValidationErrors(err))
 		return
 	}
+
+	user := input.ToUserUpdate()
 
 	updateUser, err := uh.service.UpdateUser(params.Uuid, user)
 	if err != nil {
