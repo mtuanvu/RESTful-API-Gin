@@ -15,6 +15,10 @@ type UserHandler struct {
 	service services.UserService
 }
 
+type GetUserByUUIDParam struct {
+	Uuid string `uri:"uuid" binding:"uuid"`
+}
+
 func NewUserHandler(services services.UserService) *UserHandler {
 	return &UserHandler{
 		service: services,
@@ -22,12 +26,20 @@ func NewUserHandler(services services.UserService) *UserHandler {
 }
 
 func (uh *UserHandler) GetAllUsers(ctx *gin.Context) {
+	users, err := uh.service.GetAllUsers()
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	userResponse := dtos.MapUsersToDTO(users)
+	utils.ResponseSuccess(ctx, http.StatusOK, userResponse)
 }
 
 func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 	var user models.User
 	if err := ctx.ShouldBindJSON(&user); err != nil {
-		ctx.JSON(http.StatusBadRequest, validations.HandleValidationErrors(err))
+		utils.ResponseValidator(ctx, validations.HandleValidationErrors(err))
 		return
 	}
 
@@ -43,7 +55,21 @@ func (uh *UserHandler) CreateUser(ctx *gin.Context) {
 }
 
 func (uh *UserHandler) GetUserByUUID(ctx *gin.Context) {
+	var params GetUserByUUIDParam
+	if err := ctx.ShouldBindUri(&params); err != nil {
+		utils.ResponseValidator(ctx, validations.HandleValidationErrors(err))
+		return
+	}
 
+	user, err := uh.service.GetUserByUUID(params.Uuid)
+	if err != nil {
+		utils.ResponseError(ctx, err)
+		return
+	}
+
+	userResponse := dtos.MapUserToDTO(user)
+
+	utils.ResponseSuccess(ctx, http.StatusOK, userResponse)
 }
 
 func (uh *UserHandler) UpdateUser(ctx *gin.Context) {

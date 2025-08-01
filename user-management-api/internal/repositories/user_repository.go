@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"log"
-
 	"mtuanvu.id.vn/restful-api-gin/internal/models"
 )
 
@@ -17,8 +15,8 @@ func NewInMemoryUserRepository() UserRepository {
 	}
 }
 
-func (ur *inMemoryUserRepository) FindAll() {
-	log.Println("Get All User From Repository")
+func (ur *inMemoryUserRepository) FindAll() ([]models.User, error) {
+	return ur.users, nil
 }
 
 func (ur *inMemoryUserRepository) Create(user models.User) error {
@@ -26,8 +24,14 @@ func (ur *inMemoryUserRepository) Create(user models.User) error {
 	return nil
 }
 
-func (ur *inMemoryUserRepository) FindByUUID() {
+func (ur *inMemoryUserRepository) FindByUUID(uuid string) (models.User, bool) {
+	for _, user := range ur.users {
+		if user.UUID == uuid {
+			return user, true
+		}
+	}
 
+	return models.User{}, false
 }
 
 func (ur *inMemoryUserRepository) Update() {
