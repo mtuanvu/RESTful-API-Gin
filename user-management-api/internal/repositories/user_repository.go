@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"fmt"
+
 	"mtuanvu.id.vn/restful-api-gin/internal/models"
 )
 
@@ -34,8 +36,15 @@ func (ur *inMemoryUserRepository) FindByUUID(uuid string) (models.User, bool) {
 	return models.User{}, false
 }
 
-func (ur *inMemoryUserRepository) Update() {
+func (ur *inMemoryUserRepository) Update(uuid string, user models.User) error {
+	for i, u := range ur.users {
+		if u.UUID == uuid {
+			ur.users[i] = user
+			return nil
+		}
+	}
 
+	return fmt.Errorf("user not found")
 }
 
 func (ur *inMemoryUserRepository) Delete() {
