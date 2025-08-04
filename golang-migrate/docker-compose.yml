@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:18beta2-alpine3.21
+    container_name: postgres-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: master-golang
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: tuanvu1234
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

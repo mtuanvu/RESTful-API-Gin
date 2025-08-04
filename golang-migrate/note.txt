@@ -1,0 +1,3 @@
+
+
+migrate -path internal/db/migrations -database "postgresql://root:tuanvu1234@localhost:5432/master-golang?sslmode=disable" down 1

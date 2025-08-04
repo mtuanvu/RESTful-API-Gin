@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"slices"
 
 	"mtuanvu.id.vn/restful-api-gin/internal/models"
 )
@@ -47,8 +48,15 @@ func (ur *inMemoryUserRepository) Update(uuid string, user models.User) error {
 	return fmt.Errorf("user not found")
 }
 
-func (ur *inMemoryUserRepository) Delete() {
+func (ur *inMemoryUserRepository) Delete(uuid string) error {
+	for i, u := range ur.users {
+		if u.UUID == uuid {
+			ur.users = slices.Delete(ur.users, i, i + 1)
+			return nil
+		}
+	}
 
+	return fmt.Errorf("User not found")
 }
 
 func (ur *inMemoryUserRepository) FindByEmail(email string) (models.User, bool) {
